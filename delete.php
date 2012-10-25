@@ -7,7 +7,7 @@
         $q=mysql_query('select * from `data` where `id`="'.$_POST[id].'";');
         if(mysql_num_rows($q)==1) {
             $q=mysql_fetch_assoc($q);
-            if($_SESSION['username']==$q['username'] || $_SESSION['admin']==1) {
+            if($_SESSION['usertype']==0 || $_SESSION['usertype']==2) {
                 mysql_query('delete from `data` where `id`="'.$_POST['id'].'";');
             }
             else {
