@@ -7,7 +7,7 @@
         $q=mysql_query('select * from `data` where `id`="'.$_POST['id'].'";');
         if(mysql_num_rows($q)==1) {
             $q=mysql_fetch_assoc($q);
-            if($_SESSION['admin']==1 || $_SESSION['username']==$q['username']) {
+            if($_SESSION['usertype']==0 || $_SESSION['usertype']==2) {
                 if($_POST['title']!='') {
                     if($_POST['data']!='') {
                         mysql_query('update `data` set `title` = "'.htmlspecialchars($_POST['title']).'", `data` = "'.htmlspecialchars($_POST['data']).'" where `id`="'.$_POST['id'].'";');

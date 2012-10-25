@@ -11,46 +11,327 @@
 		<?php
 			echo @$_SESSION['errs'];
 			unset($_SESSION['errs']);
-			if(isset($_POST['type'])) {
+			mysql_connect('127.0.0.1','root','rootmysql');
+			mysql_selectdb('phase1');
+			if(isset($_SESSION['username'])) {
+				mysql_query('update `users` set `authdate` = "'.time().'" where `login`="'.$_SESSION['username'].'";');
+			}
+			if(!isset($_SESSION['lng']) || (isset($_SESSION['lng']) && $_SESSION['lng']=='en')) {
+				?>
+				<a style="float:right" href="changelng.php?lng=ua"><img src="uploads/ua.jpg"></a><br>
+				<?php
+			}
+			else {
+				?>
+				<a style="float:right" href="changelng.php?lng=en"><img src="uploads/en.jpg"></a><br>
+				<?php	
+			}
+			if(isset($_SESSION['username']) && $_SESSION['usertype']!=3) {
+				?>
+				<h5 align="right">
+					You are logged as <?php echo $_SESSION['username']; ?> 
+					<?php
+					if ($_SESSION['usertype']==0) {
+						?>
+						(admin), 
+						<a href="logout.php">Log out</a><br>
+						<form action="index.php" method="post">
+							<input type="hidden" name="type" value="showProfile">
+							<input type="submit" value="Show profile">
+						</form>
+						<form action="index.php" method="post">
+							<input type="hidden" name="userlist" value="1">
+							<input type="submit" value="Show user profiles">
+						</form>
+						<?php
+					}
+					if ($_SESSION['usertype']==1) {
+						?>
+						, 
+						<a href="logout.php">Log out</a><br>
+						<form action="index.php" method="post">
+							<input type="hidden" name="type" value="showProfile">
+							<input type="submit" value="Show profile">
+						</form>
+						<?php
+					}
+					if ($_SESSION['usertype']==2) {
+						?>
+						(editor), 
+						<a href="logout.php">Log out</a><br>
+						<form action="index.php" method="post">
+							<input type="hidden" name="type" value="showProfile">
+							<input type="submit" value="Show profile">
+						</form>
+						<?php
+					}
+					?>
+				<a href="index.php">Go to main page</a>
+				</h5>
+				<?php
+			}
+			elseif(isset($_SESSION['username']) && $_SESSION['usertype']==3) {
+				?>
+				<h5 align="right">
+					<a href="logout.php">Log out</a><br>
+					<a href="index.php">Go to main page</a>
+				</h5>
+				<?php
+			}
+			else {
+				?>
+				<h5 align="right">
+					<form action="auth.php" method="post">
+						Login:<input type="text" size="10px" name="login" maxlength="30"><br>
+						Password:<input type="password" size="10px" name="password" maxlength="30"><br>
+						<input type="submit" value="Log in">
+					</form>
+					<form action="index.php" method="post">
+						<input type="hidden" name="type" value="register">
+						<input type="submit" value="Register new user">
+					</form>
+					<a href="index.php">Go to main page</a>
+				</h5>
+				<?php
+			}
+			if(isset($_POST['type']) && $_POST['type']=="register") {
 				//registration
 				?>
 				<table align="center">
-					<form action="registration.php" method="post">
+					<form action="registration.php" method="post" enctype="multipart/form-data">
 						<input type="hidden" name="type" value="<?php echo $_POST['type']; ?>">
-						<tr><td align="right">Login: </td><td><input type="text" name="login"></td></tr>
-						<tr><td align="right">E-mail: </td><td><input type="text" name="e_mail"></td></tr>
-						<tr><td align="right">Password: </td><td><input type="password" name="pass1"></td></tr>
-						<tr><td align="right">Password: </td><td><input type="password" name="pass2"></td></tr>
+						<tr><td align="right">Login: </td><td><input type="text" name="login" maxlength="30"></td></tr>
+						<tr><td align="right">E-mail: </td><td><input type="text" name="e_mail" maxlength="30"></td></tr>
+						<tr><td align="right">Password: </td><td><input type="password" name="pass1" maxlength="30"></td></tr>
+						<tr><td align="right">Password: </td><td><input type="password" name="pass2" maxlength="30"></td></tr>
 						<tr><td colspan="2" align="center"><input type="submit" value="Register"></td></tr>
 					</form>
 				</table>
 				<?php
 			}
-			else {
-				mysql_connect('127.0.0.1','root','rootmysql');
-				mysql_selectdb('phase1');
-				if(@$_SESSION['admin']==1) {
-					//enter as admin
-					?>
-					<h5 align="right">
-						You are logged as <?php echo $_SESSION['username']; ?> (admin), 
-						<a href="logout.php">Log out</a><br>
-						<form action="index.php" method="post">
-							<input type="hidden" name="type" value="admin">
-							<input type="submit" value="Register new admin">
-						</form>
-					</h5>
+			elseif ((isset($_POST['type']) && $_POST['type']=="showProfile") || (isset($_SESSION['type']) && $_SESSION['type']=="showProfile")) {
+				//show profile
+				unset($_SESSION['type']);
+				$q=mysql_query('select * from `users` where `login`="'.$_SESSION['username'].'";');
+				$q=mysql_fetch_assoc($q);
+				if ($q['ava']=='') {
+					$ava='/uploads/no_ava.png';
+				}
+				else {
+					$ava=$q['ava'];
+				}
+				?>
+				<table align="center" width="400px" border="1">
+					<tr>
+						<td rowspan="7" align="center" valign="center">
+							<img src="<?php echo $ava; ?>">
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							Login: <?php echo $q['login']; ?> 
+						</td>
+					</tr>
+						<?php
+					if($q['name']!='') {
+						?>
+						<tr>
+							<td align="left">
+								Name: <?php echo $q['name']; ?> 
+							</td>
+						</tr>
+						<?php
+					}	
+					if($q['sname']!='') {
+						?>
+						<tr>
+							<td align="left">
+								Second Name: <?php echo $q['sname']; ?> 
+							</td>
+						</tr>
+						<?php
+					}
+						?>
+					<tr>
+						<td align="left">
+							E-mail: <?php echo $q['e_mail']; ?> 
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							Registered: <?php echo date('H:i d.m.Y',$q['regdate']); ?> 
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							Last log in: <?php echo date('H:i d.m.Y',$q['authdate']); ?> 
+						</td>
+					</tr>
+				</table>
+				<center>
+					<form action="index.php" method="post" >
+						<input type="hidden" name="type" value="editProfile">
+						<input type="submit" value="Edit Profile">
+					</form>
+					<form action="delprofile.php" method="post" >
+						<input type="submit" value="Delete Profile">
+					</form>
+				</center>
+				<?php
+			}
+			elseif ((isset($_POST['type']) && $_POST['type']=="editProfile") || (isset($_SESSION['type']) && $_SESSION['type']=="editProfile")) {
+				//edit profile
+				unset($_SESSION['type']);
+				if($_SESSION['usertype']==0 && isset($_POST['username'])) {
+					$usernm=$_POST['username'];
+					unset($_POST['username']);
+				}
+				else {
+					$usernm=$_SESSION['username'];
+				}
+				$q=mysql_query('select * from `users` where `login`="'.$usernm.'";');
+				$q=mysql_fetch_assoc($q);
+				if ($q['ava']=='') {
+					$ava='/uploads/no_ava.png';
+				}
+				else {
+					$ava=$q['ava'];
+				}
+				?>
+				<form action="update.php" method="post" enctype="multipart/form-data">
+					<input type="hidden" name="username" value="<?php echo $usernm; ?>">
+				<table align="center" width="600px" border="1">
+					<tr>
+						<td align="center" rowspan="5" align="center" valign="center">
+							<img src="<?php echo $ava; ?>">
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							Name: <input name="name" type="text" maxlength="30" value="<?php echo $q['name']; ?>"> 
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							Second Name: <input name="sname" type="text" maxlength="30" value="<?php echo $q['sname']; ?>"> 
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							E-mail: <?php echo $q['e_mail']; ?>
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							<input type="file" name="newAva" size="20" accept="image/jpeg,image/png,image/gif">
+						</td>
+					</tr>
 					<?php
-					if(isset($_GET['id'])) {
-						if(@$_GET['editing']==1) {
+					if($usernm!=$_SESSION['username']) {
+						?>
+						<tr>
+							<td align="left">
+								Type: 
+								<?php
+								if($q['type']==0) {
+									?>
+									<input type="radio" name="type" value="0" checked="true">Admin
+									<?php
+								}
+								else {
+									?>
+									<input type="radio" name="type" value="0">Admin
+									<?php
+								} 
+								if($q['type']==1) {
+									?>
+									<input type="radio" name="type" value="1" checked="true">User
+									<?php
+								}
+								else {
+									?>
+									<input type="radio" name="type" value="1">User
+									<?php
+								}
+								if($q['type']==2) {
+									?>
+									<input type="radio" name="type" value="2" checked="true">Editor
+									<?php
+								}
+								else {
+									?>
+									<input type="radio" name="type" value="2">Editor
+									<?php
+								}
+								if($q['type']==3) {
+									?>
+									<input type="radio" name="type" value="3" checked="true">Banned
+									<?php
+								}
+								else {
+									?>
+									<input type="radio" name="type" value="3">Banned
+									<?php
+								}
+								?>
+							</td>
+					</tr>
+						<?php
+					}
+					?>
+					<tr>
+						<td colspan="2" align="center">
+							<input type="submit" value="Send">
+						</td>
+					</tr>
+				</table>
+				</form>
+				<?php
+			}
+			else {
+				if(isset($_SESSION['usertype']) && $_SESSION['usertype']==0) {
+					//enter as admin
+					if(isset($_POST['userlist']) && $_POST['userlist']==1) {
+						$q=mysql_query('select `id`, `login` from `users` where `login`<>"'.$_SESSION['username'].'";');
+						?>
+						<table align="center" width="800px" border="1">
+						<?php
+						for($i=0;$i<mysql_num_rows($q);$i++) {
+							?>
+							<tr>
+								<td>
+									<?php echo mysql_result($q,$i,'login'); ?>
+								</td>
+								<td width="20%">
+									<form action="index.php" method="post">
+										<input type="hidden" name="username" value="<?php echo mysql_result($q, $i, 'login'); ?>">
+										<input type="hidden" name="type" value="editProfile">
+										<input type="submit" value="Edit">
+									</form>
+								</td>
+								<td width="20%">
+									<form action="delprofile.php" method="post">
+										<input type="hidden" name="userid" value="<?php echo mysql_result($q, $i, 'id'); ?>">
+										<input type="submit" value="Delete">
+									</form>
+								</td>
+							</tr>
+							<?php
+						}
+						?>
+						</table>
+						<?php
+					}
+					elseif(isset($_GET['id'])) {
+						if(isset($_GET['editing']) && $_GET['editing']==1) {
 							$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
 							$q=mysql_fetch_assoc($q);
 							?>
 							<table align="center" border="5" width="600px">
 							<form action="edit.php" method="post">
 							<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
-							<tr><td align="center"><input type="text" name="title" size="100px" value="<?php echo htmlspecialchars_decode($q['title']); ?>"></td></tr>
-							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"><?php echo htmlspecialchars_decode($q['data']); ?></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="title" size="100px" value="<?php echo $q['title']; ?>"></td></tr>
+							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"><?php echo $q['data']; ?></textarea></td></tr>
 							<tr><td align="center"><input type="submit" value="Save"></td></tr>
 							</form>
 							</table>
@@ -129,24 +410,18 @@
 						<?php
 					}
 				}
-				elseif(isset($_SESSION['username'])) {
-					//enter as user
-					?>
-					<h5 align="right">
-						You are logged as <?php echo $_SESSION['username']; ?>, 
-						<a href="logout.php">Log out</a>
-					</h5>
-					<?php
+				elseif(isset($_SESSION['username']) && $_SESSION['usertype']!=3) {
+					//enter as user or editor
 					if(isset($_GET['id'])) {
-						if(@$_GET['editing']==1) {
+						if(@$_GET['editing']==1 && $_SESSION['usertype']==2) {
 							$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
 							$q=mysql_fetch_assoc($q);
 							?>
 							<table align="center" border="5" width="600px">
 							<form action="edit.php" method="post">
 							<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
-							<tr><td align="center"><input type="text" name="title" size="100px" value="<?php echo htmlspecialchars_decode($q['title']); ?>"></td></tr>
-							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"><?php echo htmlspecialchars_decode($q['data']); ?></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="title" size="100px" value="<?php echo $q['title']; ?>"></td></tr>
+							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"><?php echo $q['data']; ?></textarea></td></tr>
 							<tr><td align="center"><input type="submit" value="Save"></td></tr>
 							</form>
 							</table>
@@ -162,6 +437,9 @@
 									<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
 									<tr><td align="left"  width="50%"><?php echo $q['username']; ?></td><td align="right"><?php echo $q['time']; ?></td></tr>
 									<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data']; ?></td></tr>
+								<?php
+								if ($_SESSION['usertype']==2) {
+									?>
 									<tr>
 										<td align="right">
 											<form action="index.php" method="get">
@@ -177,6 +455,9 @@
 											</form>
 										</td>
 									</tr>
+									<?php
+								}
+								?>
 								</table>
 								<?php
 							}
@@ -214,32 +495,26 @@
 							</table><br>
 							<?php
 						}
-						?>
-						<table align="center" border="5" width="600px">
-						<form action="send.php" method="post">
-						<tr><td align="center"><input type="text" name="title" placeholder="Title" size="100px"></td></tr>
-						<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"></textarea></td></tr>
-						<tr><td align="center"><input type="submit" value="Send"></td></tr>
-						</form>
-						</table>
-						<?php
+						if ($_SESSION['usertype']==2) {
+							?>
+							<table align="center" border="5" width="600px">
+							<form action="send.php" method="post">
+							<tr><td align="center"><input type="text" name="title" placeholder="Title" size="100px"></td></tr>
+							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"></textarea></td></tr>
+							<tr><td align="center"><input type="submit" value="Send"></td></tr>
+							</form>
+							</table>
+							<?php
+						}
 					}
+				}
+				elseif (isset($_SESSION['usertype']) && $_SESSION['usertype']==3) {
+					?>
+					<h2 align="center">You was banned</h2>
+					<?php
 				}
 				else {
 					//not auth
-					?>
-					<h5 align="right">
-						<form action="auth.php" method="post">
-							Login:<input type="text" size="10px" name="login"><br>
-							Password:<input type="password" size="10px" name="password"><br>
-							<input type="submit" value="Log in">
-						</form>
-						<form action="index.php" method="post">
-							<input type="hidden" name="type" value="user">
-							<input type="submit" value="Register new user">
-						</form>
-					</h5>
-					<?php
 					if(isset($_GET['id'])) {
 						$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
 						if(mysql_num_rows($q)==1) {

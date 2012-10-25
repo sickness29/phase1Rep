@@ -11,9 +11,7 @@
             $q=mysql_fetch_assoc($q);
             if(md5($password.md5($q['salt']))==$q['password']) {
                 $_SESSION['username']=$login;
-                if($q['type']==0) {
-                    $_SESSION['admin']=1;
-                }
+                $_SESSION['usertype']=$q['type'];
             }
             else {
                 $_SESSION['errs'].='<br>- Incorrect password';
