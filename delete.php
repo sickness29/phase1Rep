@@ -1,14 +1,13 @@
 <?php
     session_start();
-    mysql_connect('127.0.0.1','root','rootmysql');
-    mysql_selectdb('phase1');
+    include_once 'connect.php';
     $_SESSION['errs']='<font color="red"><h4 align="right">';
     if(isset($_POST['id'])) {
-        $q=mysql_query('select * from `data` where `id`="'.$_POST[id].'";');
-        if(mysql_num_rows($q)==1) {
-            $q=mysql_fetch_assoc($q);
+        $q=$db->query('select * from `data` where `id`="'.$_POST[id].'";');
+        if($q->rowCount()==1) {
+            $q=$->fetch(PDO::FETCH_ASSOC);
             if($_SESSION['usertype']==0 || $_SESSION['usertype']==2) {
-                mysql_query('delete from `data` where `id`="'.$_POST['id'].'";');
+                $db->exec('delete from `data` where `id`="'.$_POST['id'].'";');
             }
             else {
                 $_SESSION['errs'].='<br>- Access denied';
@@ -22,6 +21,5 @@
         $_SESSION['errs'].='<br>- Data was not selected';
     }
     $_SESSION['errs'].='</h4></font>';
-    mysql_close();
     header('location: index.php');
 ?>

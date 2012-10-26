@@ -1,7 +1,6 @@
 <?php
 	session_start();
-	mysql_connect('127.0.0.1','root','rootmysql');
-	mysql_selectdb('phase1');
+	include_once 'connect.php';
 	if (isset($_POST['type'])) {
 		$usernm=$_POST['username'];
 		$tp=$_POST['type'];
@@ -9,7 +8,8 @@
 	else {
 		$usernm=$_SESSION['username'];
 	}
-	$q=mysql_fetch_assoc(mysql_query('select * from `users` where `login`="'.$usernm.'";'));
+	$q=$db->query('select * from `users` where `login`="'.$usernm.'";');
+	$q=$q->fetch(PDO::FETCH_ASSOC);
 	if(isset($_POST['type'])==FALSE) {
 		$tp=$q['type'];
 	}
@@ -40,8 +40,7 @@
 	}
 	$name=trim($_POST['name']);
 	$sname=trim($_POST['sname']);
-	mysql_query('update `users` set `name`="'.htmlspecialchars($name).'", `sname`="'.htmlspecialchars($sname).'", `ava`="'.$avatar.'", `type`="'.$tp.'" where `login`="'.$usernm.'";');
-	mysql_close();
+	$db->exec('update `users` set `name`="'.htmlspecialchars($name).'", `sname`="'.htmlspecialchars($sname).'", `ava`="'.$avatar.'", `type`="'.$tp.'" where `login`="'.$usernm.'";');
 	if(isset($_POST['type'])==FALSE) {
 		$_SESSION['type']="showProfile";
 	}

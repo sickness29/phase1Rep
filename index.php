@@ -9,12 +9,9 @@
 	</head>
 	<body>
 		<?php
-			echo @$_SESSION['errs'];
-			unset($_SESSION['errs']);
-			mysql_connect('127.0.0.1','root','rootmysql');
-			mysql_selectdb('phase1');
+			include_once 'connect.php';
 			if(isset($_SESSION['username'])) {
-				mysql_query('update `users` set `authdate` = "'.time().'" where `login`="'.$_SESSION['username'].'";');
+				$db->exec('update `users` set `authdate` = "'.time().'" where `login`="'.$_SESSION['username'].'";');
 			}
 			if(!isset($_SESSION['lng']) || (isset($_SESSION['lng']) && $_SESSION['lng']=='en')) {
 				?>
@@ -26,6 +23,8 @@
 				<a style="float:right" href="changelng.php?lng=en"><img src="uploads/en.jpg"></a><br>
 				<?php	
 			}
+			echo @$_SESSION['errs'];
+			unset($_SESSION['errs']);
 			if(isset($_SESSION['username']) && $_SESSION['usertype']!=3) {
 				?>
 				<h5 align="right">
@@ -112,8 +111,8 @@
 			elseif ((isset($_POST['type']) && $_POST['type']=="showProfile") || (isset($_SESSION['type']) && $_SESSION['type']=="showProfile")) {
 				//show profile
 				unset($_SESSION['type']);
-				$q=mysql_query('select * from `users` where `login`="'.$_SESSION['username'].'";');
-				$q=mysql_fetch_assoc($q);
+				$q=$db->query('select * from `users` where `login`="'.$_SESSION['username'].'";');
+				$q=$q->fetch(PDO::FETCH_ASSOC);
 				if ($q['ava']=='') {
 					$ava='/uploads/no_ava.png';
 				}
@@ -189,8 +188,8 @@
 				else {
 					$usernm=$_SESSION['username'];
 				}
-				$q=mysql_query('select * from `users` where `login`="'.$usernm.'";');
-				$q=mysql_fetch_assoc($q);
+				$q=$db->query('select * from `users` where `login`="'.$usernm.'";');
+				$q=$q->fetch(PDO::FETCH_ASSOC);
 				if ($q['ava']=='') {
 					$ava='/uploads/no_ava.png';
 				}
@@ -292,26 +291,28 @@
 				if(isset($_SESSION['usertype']) && $_SESSION['usertype']==0) {
 					//enter as admin
 					if(isset($_POST['userlist']) && $_POST['userlist']==1) {
-						$q=mysql_query('select `id`, `login` from `users` where `login`<>"'.$_SESSION['username'].'";');
+						$q=$db->query('select `id`, `login` from `users` where `login`<>"'.$_SESSION['username'].'";');
 						?>
 						<table align="center" width="800px" border="1">
 						<?php
-						for($i=0;$i<mysql_num_rows($q);$i++) {
+						$nrow=$q->rowCount();
+						for($i=0;$i<$nrow;$i++) {
+							$row=$q->fetch(PDO::FETCH_ASSOC);
 							?>
 							<tr>
 								<td>
-									<?php echo mysql_result($q,$i,'login'); ?>
+									<?php echo $row['login']; ?>
 								</td>
 								<td width="20%">
 									<form action="index.php" method="post">
-										<input type="hidden" name="username" value="<?php echo mysql_result($q, $i, 'login'); ?>">
+										<input type="hidden" name="username" value="<?php echo $row['login']; ?>">
 										<input type="hidden" name="type" value="editProfile">
 										<input type="submit" value="Edit">
 									</form>
 								</td>
 								<td width="20%">
 									<form action="delprofile.php" method="post">
-										<input type="hidden" name="userid" value="<?php echo mysql_result($q, $i, 'id'); ?>">
+										<input type="hidden" name="userid" value="<?php echo $row['id']; ?>">
 										<input type="submit" value="Delete">
 									</form>
 								</td>
@@ -324,8 +325,8 @@
 					}
 					elseif(isset($_GET['id'])) {
 						if(isset($_GET['editing']) && $_GET['editing']==1) {
-							$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
-							$q=mysql_fetch_assoc($q);
+							$q=$db->query('select * from `data` where `id`="'.$_GET['id'].'";');
+							$q=$q->fetch(PDO::FETCH_ASSOC);
 							?>
 							<table align="center" border="5" width="600px">
 							<form action="edit.php" method="post">
@@ -338,9 +339,9 @@
 							<?php
 						}
 						else {
-							$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
-							if(mysql_num_rows($q)==1) {
-								$q=mysql_fetch_assoc($q);
+							$q=$db->query('select * from `data` where `id`="'.$_GET['id'].'";');
+							if($q->rowCount()==1) {
+								$q=$q->fetch(PDO::FETCH_ASSOC);
 								?>
 								<h2 align="center"><?php echo $q['title']; ?></h2>
 								<table border="1" align="center" width="800px">
@@ -374,10 +375,12 @@
 						?>
 						<h2 align="center">Welcome to main page</h2>
 						<?php
-						$q=mysql_query('select * from `data` order by `id` desc;');
-						for($i=0;$i<mysql_num_rows($q);$i++) {
-							if(strlen(mysql_result($q,$i,'data'))>150) {
-								$data=substr(mysql_result($q,$i,'data'),0,150);
+						$q=$db->query('select * from `data` order by `id` desc;');
+						$nrow=$q->rowCount();
+						for($i=0;$i<$nrow;$i++) {
+							$row=$q->fetch(PDO::FETCH_ASSOC);
+							if(strlen($row['data'])>150) {
+								$data=substr($row['data'],0,150);
 								$res=strpos($data,' ');
 								if($res===false || $res>150) {}
 								else {
@@ -388,14 +391,14 @@
 								$data.='...';
 							}
 							else {
-								$data=mysql_result($q,$i,'data');
+								$data=$row['data'];
 							}
 							?>
 							<table border="2" align="center" width="800px">
-								<tr><td align="left" width="50%"><?php echo mysql_result($q,$i,'username'); ?></td><td align="right"><?php echo mysql_result($q,$i,'time'); ?></td></tr>
-								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo mysql_result($q,$i,'id'); ?>"><?php echo mysql_result($q,$i,'title'); ?></a></font></td></tr>
+								<tr><td align="left" width="50%"><?php echo $row['username']; ?></td><td align="right"><?php echo $row['time']; ?></td></tr>
+								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title']; ?></a></font></td></tr>
 								<tr><td colspan="2" align="justify" height="100px"><?php echo $data; ?></td></tr>
-								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo mysql_result($q,$i,'id'); ?>">Read more...</a></td></tr>
+								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo $row['id']; ?>">Read more...</a></td></tr>
 							</table><br>
 							<?php
 						}
@@ -414,8 +417,8 @@
 					//enter as user or editor
 					if(isset($_GET['id'])) {
 						if(@$_GET['editing']==1 && $_SESSION['usertype']==2) {
-							$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
-							$q=mysql_fetch_assoc($q);
+							$q=$db->query('select * from `data` where `id`="'.$_GET['id'].'";');
+							$q=$q->fetch(PDO::FETCH_ASSOC);
 							?>
 							<table align="center" border="5" width="600px">
 							<form action="edit.php" method="post">
@@ -428,9 +431,9 @@
 							<?php
 						}
 						else {
-							$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
-							if(mysql_num_rows($q)==1) {
-								$q=mysql_fetch_assoc($q);
+							$q=$db->query('select * from `data` where `id`="'.$_GET['id'].'";');
+							if($q->rowCount()==1) {
+								$q=$q->fetch(PDO::FETCH_ASSOC);
 								?>
 								<h2 align="center"><?php echo $q['title']; ?></h2>
 								<table border="1" align="center" width="800px">
@@ -470,10 +473,12 @@
 						?>
 						<h2 align="center">Welcome to main page</h2>
 						<?php
-						$q=mysql_query('select * from `data` order by `id` desc;');
-						for($i=0;$i<mysql_num_rows($q);$i++) {
-							if(strlen(mysql_result($q,$i,'data'))>150) {
-								$data=substr(mysql_result($q,$i,'data'),0,150);
+						$q=$db->query('select * from `data` order by `id` desc;');
+						$nrow=$q->rowCount();
+						for($i=0;$i<$nrow;$i++) {
+							$row=$q->fetch(PDO::FETCH_ASSOC);
+							if(strlen($row['data'])>150) {
+								$data=substr($row['data'],0,150);
 								$res=strpos($data,' ');
 								if($res===false || $res>150) {}
 								else {
@@ -484,14 +489,14 @@
 								$data.='...';
 							}
 							else {
-								$data=mysql_result($q,$i,'data');
+								$data=$row['data'];
 							}
 							?>
 							<table border="2" align="center" width="800px">
-								<tr><td align="left" width="50%"><?php echo mysql_result($q,$i,'username'); ?></td><td align="right"><?php echo mysql_result($q,$i,'time'); ?></td></tr>
-								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo mysql_result($q,$i,'id'); ?>"><?php echo mysql_result($q,$i,'title'); ?></a></font></td></tr>
+								<tr><td align="left" width="50%"><?php echo $row['username']; ?></td><td align="right"><?php echo $row['time']; ?></td></tr>
+								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title']; ?></a></font></td></tr>
 								<tr><td colspan="2" align="justify" height="100px" colspec="95%"><?php echo $data; ?></td></tr>
-								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo mysql_result($q,$i,'id'); ?>">Read more...</a></td></tr>
+								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo $row['id']; ?>">Read more...</a></td></tr>
 							</table><br>
 							<?php
 						}
@@ -516,9 +521,9 @@
 				else {
 					//not auth
 					if(isset($_GET['id'])) {
-						$q=mysql_query('select * from `data` where `id`="'.$_GET['id'].'";');
-						if(mysql_num_rows($q)==1) {
-							$q=mysql_fetch_assoc($q);
+						$q=$db->query('select * from `data` where `id`="'.$_GET['id'].'";');
+						if($q->rowCount()==1) {
+							$q=$q->fetch(PDO::FETCH_ASSOC);
 							?>
 							<h2 align="center"><?php echo $q['title']; ?></h2>
 							<table border="1" align="center" width="800px">
@@ -536,10 +541,12 @@
 						?>
 						<h2 align="center">Welcome to main page</h2>
 						<?php
-						$q=mysql_query('select * from `data` order by `id` desc;');
-						for($i=0;$i<mysql_num_rows($q);$i++) {
-							if(strlen(mysql_result($q,$i,'data'))>150) {
-								$data=substr(mysql_result($q,$i,'data'),0,150);
+						$q=$db->query('select * from `data` order by `id` desc;');
+						$nrow=$q->rowCount();
+						for($i=0;$i<$nrow;$i++) {
+							$row=$q->fetch(PDO::FETCH_ASSOC);
+							if(strlen($row['data'])>150) {
+								$data=substr($row['data'],0,150);
 								$res=strpos($data,' ');
 								if($res===false || $res>150) {}
 								else {
@@ -550,20 +557,19 @@
 								$data.='...';
 							}
 							else {
-								$data=mysql_result($q,$i,'data');
+								$data=$row['data'];
 							}
 							?>
 							<table border="2" align="center" width="800px">
-								<tr><td align="left" width="50%"><?php echo mysql_result($q,$i,'username'); ?></td><td align="right"><?php echo mysql_result($q,$i,'time'); ?></td></tr>
-								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo mysql_result($q,$i,'id'); ?>"><?php echo mysql_result($q,$i,'title'); ?></a></font></td></tr>
+								<tr><td align="left" width="50%"><?php echo $row['username']; ?></td><td align="right"><?php echo $row['time']; ?></td></tr>
+								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title']; ?></a></font></td></tr>
 								<tr><td colspan="2" align="justify" height="100px" colspec="95%"><?php echo $data; ?></td></tr>
-								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo mysql_result($q,$i,'id'); ?>">Read more...</a></td></tr>
+								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo $row['id']; ?>">Read more...</a></td></tr>
 							</table><br>
 							<?php
 						}
 					}
 				}
-				mysql_close();
 			}
 		?>
 	</body>

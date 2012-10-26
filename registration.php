@@ -8,24 +8,29 @@
 		}
 		return $salt;
 	}
-    mysql_connect('127.0.0.1','root','rootmysql');
-    mysql_selectdb('phase1');
+    include_once 'connect.php';
     $login=trim($_POST['login']);
     $e_mail=filter_var($_POST['e_mail'],FILTER_VALIDATE_EMAIL);
-    $q=mysql_query('select * from `users` where `login`="'.$login.'";');
+    $q=$db->query('select * from `users` where `login`="'.$login.'";');
     $_SESSION['errs']='<font color="red"><h4 align="right">';
     if($login!='' && preg_match("/^[a-z0-9_-]{3,20}$/",$login)) {
-        if(mysql_num_rows($q)==0) {
+        if($q->rowCount()==0) {
             if($e_mail!=FALSE) {
-                if($_POST['pass1']==$_POST['pass2']) {
-                    $salt=generateSalt();
-                    $password=md5($_POST['pass1'].md5($salt));
-                    mysql_query('insert into `users` (`login`,`e_mail`,`password`,`salt`,`type`,`regdate`) values ("'.$login.'","'.$e_mail.'","'.$password.'","'.$salt.'",1,"'.time().'");');
-                    $_SESSION['username']=$login;
-                    $_SESSION['usertype']=1;
+                $q=$db->query('select * from `users` where `e_mail`="'.$e_mail.'";');
+                if($q->rowCount()==0) {
+                    if($_POST['pass1']==$_POST['pass2']) {
+                        $salt=generateSalt();
+                        $password=md5($_POST['pass1'].md5($salt));
+                        $db->exec('insert into `users` (`login`,`e_mail`,`password`,`salt`,`type`,`regdate`) values ("'.$login.'","'.$e_mail.'","'.$password.'","'.$salt.'",1,"'.time().'");');
+                        $_SESSION['username']=$login;
+                        $_SESSION['usertype']=1;
+                    }
+                    else {
+                        $_SESSION['errs'].='<br>- Passwords are not the same';
+                    }
                 }
                 else {
-                    $_SESSION['errs'].='<br>- Passwords are not the same';
+                    $_SESSION['errs'].='<br>- This e-mail is busy';
                 }
             }
             else {
@@ -40,6 +45,5 @@
         $_SESSION['errs'].='<br>- Please enter valid login';
     }
     $_SESSION['errs'].='</h4></font>';
-    mysql_close();
     header('location: index.php');
 ?>
