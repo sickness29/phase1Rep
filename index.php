@@ -331,8 +331,10 @@
 							<table align="center" border="5" width="600px">
 							<form action="edit.php" method="post">
 							<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
-							<tr><td align="center"><input type="text" name="title" size="100px" value="<?php echo $q['title']; ?>"></td></tr>
-							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"><?php echo $q['data']; ?></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="titleua" size="100px" value="<?php echo $q['titleua']; ?>"></td></tr>
+							<tr><td align="center">UA: <textarea style="resize: none" rows="10" cols="45" name="dataua"><?php echo $q['dataua']; ?></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="titleen" size="100px" value="<?php echo $q['titleen']; ?>"></td></tr>
+							<tr><td align="center">EN: <textarea style="resize: none" rows="10" cols="45" name="dataen"><?php echo $q['dataen']; ?></textarea></td></tr>
 							<tr><td align="center"><input type="submit" value="Save"></td></tr>
 							</form>
 							</table>
@@ -343,11 +345,11 @@
 							if($q->rowCount()==1) {
 								$q=$q->fetch(PDO::FETCH_ASSOC);
 								?>
-								<h2 align="center"><?php echo $q['title']; ?></h2>
+								<h2 align="center"><?php echo $q['title'.$_SESSION['lng']]; ?></h2>
 								<table border="1" align="center" width="800px">
 									<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
 									<tr><td align="left"  width="50%"><?php echo $q['username']; ?></td><td align="right"><?php echo $q['time']; ?></td></tr>
-									<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data']; ?></td></tr>
+									<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data'.$_SESSION['lng']]; ?></td></tr>
 									<tr>
 										<td align="right">
 											<form action="index.php" method="get">
@@ -379,8 +381,8 @@
 						$nrow=$q->rowCount();
 						for($i=0;$i<$nrow;$i++) {
 							$row=$q->fetch(PDO::FETCH_ASSOC);
-							if(strlen($row['data'])>150) {
-								$data=substr($row['data'],0,150);
+							if(strlen($row['data'.$_SESSION['lng']])>150) {
+								$data=substr($row['data'.$_SESSION['lng']],0,150);
 								$res=strpos($data,' ');
 								if($res===false || $res>150) {}
 								else {
@@ -391,12 +393,12 @@
 								$data.='...';
 							}
 							else {
-								$data=$row['data'];
+								$data=$row['data'.$_SESSION['lng']];
 							}
 							?>
 							<table border="2" align="center" width="800px">
 								<tr><td align="left" width="50%"><?php echo $row['username']; ?></td><td align="right"><?php echo $row['time']; ?></td></tr>
-								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title']; ?></a></font></td></tr>
+								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title'.$_SESSION['lng']]; ?></a></font></td></tr>
 								<tr><td colspan="2" align="justify" height="100px"><?php echo $data; ?></td></tr>
 								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo $row['id']; ?>">Read more...</a></td></tr>
 							</table><br>
@@ -405,8 +407,10 @@
 						?>
 						<table align="center" border="5" width="600px">
 						<form action="send.php" method="post">
-						<tr><td align="center"><input type="text" name="title" placeholder="Title" size="100px"></td></tr>
-						<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"></textarea></td></tr>
+						<tr><td align="center"><input type="text" name="titleua" placeholder="Заголовок" size="100px"></td></tr>
+						<tr><td align="center">UA: <textarea style="resize: none" rows="10" cols="45" name="dataua"></textarea></td></tr>
+						<tr><td align="center"><input type="text" name="titleen" placeholder="Title" size="100px"></td></tr>
+						<tr><td align="center">EN: <textarea style="resize: none" rows="10" cols="45" name="dataen"></textarea></td></tr>
 						<tr><td align="center"><input type="submit" value="Send"></td></tr>
 						</form>
 						</table>
@@ -423,8 +427,10 @@
 							<table align="center" border="5" width="600px">
 							<form action="edit.php" method="post">
 							<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
-							<tr><td align="center"><input type="text" name="title" size="100px" value="<?php echo $q['title']; ?>"></td></tr>
-							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"><?php echo $q['data']; ?></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="titleua" size="100px" value="<?php echo $q['titleua']; ?>"></td></tr>
+							<tr><td align="center">UA: <textarea style="resize: none" rows="10" cols="45" name="dataua"><?php echo $q['dataua']; ?></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="titleen" size="100px" value="<?php echo $q['titleen']; ?>"></td></tr>
+							<tr><td align="center">EN: <textarea style="resize: none" rows="10" cols="45" name="dataen"><?php echo $q['dataen']; ?></textarea></td></tr>
 							<tr><td align="center"><input type="submit" value="Save"></td></tr>
 							</form>
 							</table>
@@ -435,11 +441,11 @@
 							if($q->rowCount()==1) {
 								$q=$q->fetch(PDO::FETCH_ASSOC);
 								?>
-								<h2 align="center"><?php echo $q['title']; ?></h2>
+								<h2 align="center"><?php echo $q['title'.$_SESSION['lng']]; ?></h2>
 								<table border="1" align="center" width="800px">
 									<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
 									<tr><td align="left"  width="50%"><?php echo $q['username']; ?></td><td align="right"><?php echo $q['time']; ?></td></tr>
-									<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data']; ?></td></tr>
+									<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data'.$_SESSION['lng']]; ?></td></tr>
 								<?php
 								if ($_SESSION['usertype']==2) {
 									?>
@@ -477,8 +483,8 @@
 						$nrow=$q->rowCount();
 						for($i=0;$i<$nrow;$i++) {
 							$row=$q->fetch(PDO::FETCH_ASSOC);
-							if(strlen($row['data'])>150) {
-								$data=substr($row['data'],0,150);
+							if(strlen($row['data'.$_SESSION['lng']])>150) {
+								$data=substr($row['data'.$_SESSION['lng']],0,150);
 								$res=strpos($data,' ');
 								if($res===false || $res>150) {}
 								else {
@@ -489,12 +495,12 @@
 								$data.='...';
 							}
 							else {
-								$data=$row['data'];
+								$data=$row['data'.$_SESSION['lng']];
 							}
 							?>
 							<table border="2" align="center" width="800px">
 								<tr><td align="left" width="50%"><?php echo $row['username']; ?></td><td align="right"><?php echo $row['time']; ?></td></tr>
-								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title']; ?></a></font></td></tr>
+								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title'.$_SESSION['lng']]; ?></a></font></td></tr>
 								<tr><td colspan="2" align="justify" height="100px" colspec="95%"><?php echo $data; ?></td></tr>
 								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo $row['id']; ?>">Read more...</a></td></tr>
 							</table><br>
@@ -504,8 +510,10 @@
 							?>
 							<table align="center" border="5" width="600px">
 							<form action="send.php" method="post">
-							<tr><td align="center"><input type="text" name="title" placeholder="Title" size="100px"></td></tr>
-							<tr><td align="center"><textarea style="resize: none" rows="10" cols="45" name="data"></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="titleua" placeholder="Заголовок" size="100px"></td></tr>
+							<tr><td align="center">UA: <textarea style="resize: none" rows="10" cols="45" name="dataua"></textarea></td></tr>
+							<tr><td align="center"><input type="text" name="titleen" placeholder="Title" size="100px"></td></tr>
+							<tr><td align="center">EN: <textarea style="resize: none" rows="10" cols="45" name="dataen"></textarea></td></tr>
 							<tr><td align="center"><input type="submit" value="Send"></td></tr>
 							</form>
 							</table>
@@ -525,11 +533,11 @@
 						if($q->rowCount()==1) {
 							$q=$q->fetch(PDO::FETCH_ASSOC);
 							?>
-							<h2 align="center"><?php echo $q['title']; ?></h2>
+							<h2 align="center"><?php echo $q['title'.$_SESSION['lng']]; ?></h2>
 							<table border="1" align="center" width="800px">
 								<input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
 								<tr><td align="left"  width="50%"><?php echo $q['username']; ?></td><td align="right"><?php echo $q['time']; ?></td></tr>
-								<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data']; ?></td></tr>
+								<tr><td colspan="2" align="justify" height="100px"><?php echo $q['data'.$_SESSION['lng']]; ?></td></tr>
 							</table>
 							<?php
 						}
@@ -545,8 +553,8 @@
 						$nrow=$q->rowCount();
 						for($i=0;$i<$nrow;$i++) {
 							$row=$q->fetch(PDO::FETCH_ASSOC);
-							if(strlen($row['data'])>150) {
-								$data=substr($row['data'],0,150);
+							if(strlen($row['data'.$_SESSION['lng']])>150) {
+								$data=substr($row['data'.$_SESSION['lng']],0,150);
 								$res=strpos($data,' ');
 								if($res===false || $res>150) {}
 								else {
@@ -557,12 +565,12 @@
 								$data.='...';
 							}
 							else {
-								$data=$row['data'];
+								$data=$row['data'.$_SESSION['lng']];
 							}
 							?>
 							<table border="2" align="center" width="800px">
 								<tr><td align="left" width="50%"><?php echo $row['username']; ?></td><td align="right"><?php echo $row['time']; ?></td></tr>
-								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title']; ?></a></font></td></tr>
+								<tr><td colspan="2" align="center" ><font size="5"><a href="index.php?id=<?php echo $row['id']; ?>"><?php echo $row['title'.$_SESSION['lng']]; ?></a></font></td></tr>
 								<tr><td colspan="2" align="justify" height="100px" colspec="95%"><?php echo $data; ?></td></tr>
 								<tr><td colspan="2" align="right"><a href="index.php?id=<?php echo $row['id']; ?>">Read more...</a></td></tr>
 							</table><br>

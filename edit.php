@@ -7,9 +7,9 @@
         if($q->rowCount()==1) {
             $q=$q->fetch(PDO::FETCH_ASSOC);
             if($_SESSION['usertype']==0 || $_SESSION['usertype']==2) {
-                if($_POST['title']!='') {
-                    if($_POST['data']!='') {
-                        $db->exec('update `data` set `title` = "'.htmlspecialchars($_POST['title']).'", `data` = "'.htmlspecialchars($_POST['data']).'" where `id`="'.$_POST['id'].'";');
+                if($_POST['titleua']!='' && $_POST['titleen']!='') {
+                    if($_POST['dataua']!='' && $_POST['dataen']!='') {
+                        $db->exec('update `data` set `titleua` = "'.htmlspecialchars($_POST['titleua']).'", `dataua` = "'.htmlspecialchars($_POST['dataua']).'",`titleen` = "'.htmlspecialchars($_POST['titleen']).'", `dataen` = "'.htmlspecialchars($_POST['dataen']).'" where `id`="'.$_POST['id'].'";');
                     }
                     else {
                         $_SESSION['errs'].='<br>- Enter the text';            
