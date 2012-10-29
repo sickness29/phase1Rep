@@ -4,6 +4,7 @@
     $login=$_POST['login'];
     $password=$_POST['password'];
     $_SESSION['errs']='<font color="red"><h4 align="right">';
+    $language=$db->query('select * from `languages` where `language`="'.$_SESSION['lng'].'";')->fetch(PDO::FETCH_ASSOC);
     if($login!='' && $password!='') {
         $q=$db->query('select * from `users` where `login`="'.$login.'";');
         if($q->rowCount()==1) {
@@ -13,15 +14,15 @@
                 $_SESSION['usertype']=$q['type'];
             }
             else {
-                $_SESSION['errs'].='<br>- Incorrect password';
+                $_SESSION['errs'].='<br>- '.$language['28'];
             }
         }
         else {
-            $_SESSION['errs'].='<br>- No such user';
+            $_SESSION['errs'].='<br>- '.$language['29'];
         }
     }
     else {
-        $_SESSION['errs'].='<br>- Enter login and password';
+        $_SESSION['errs'].='<br>- '.$language['30'];
     }
     $_SESSION['errs'].='</h4></font>';
     header("location: index.php");

@@ -41,8 +41,6 @@
 	$name=trim($_POST['name']);
 	$sname=trim($_POST['sname']);
 	$db->exec('update `users` set `name`="'.htmlspecialchars($name).'", `sname`="'.htmlspecialchars($sname).'", `ava`="'.$avatar.'", `type`="'.$tp.'" where `login`="'.$usernm.'";');
-	if(isset($_POST['type'])==FALSE) {
-		$_SESSION['type']="showProfile";
-	}
+	$_SESSION['type']="showProfile";
 	header("Location: index.php");
 ?>

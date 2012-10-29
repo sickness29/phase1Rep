@@ -13,6 +13,7 @@
     $e_mail=filter_var($_POST['e_mail'],FILTER_VALIDATE_EMAIL);
     $q=$db->query('select * from `users` where `login`="'.$login.'";');
     $_SESSION['errs']='<font color="red"><h4 align="right">';
+    $language=$db->query('select * from `languages` where `language`="'.$_SESSION['lng'].'";')->fetch(PDO::FETCH_ASSOC);
     if($login!='' && preg_match("/^[a-z0-9_-]{3,20}$/",$login)) {
         if($q->rowCount()==0) {
             if($e_mail!=FALSE) {
@@ -26,24 +27,29 @@
                         $_SESSION['usertype']=1;
                     }
                     else {
-                        $_SESSION['errs'].='<br>- Passwords are not the same';
+                        $_SESSION['errs'].='<br>- '.$language['37'];
                     }
                 }
                 else {
-                    $_SESSION['errs'].='<br>- This e-mail is busy';
+                    $_SESSION['errs'].='<br>- '.$language['38'];
                 }
             }
             else {
-                $_SESSION['errs'].='<br>- Incorrect e-mail';
+                $_SESSION['errs'].='<br>- '.$language['39'];
             }
         }
         else {
-            $_SESSION['errs'].='<br>- This login is busy';
+            $_SESSION['errs'].='<br>- '.$language['40'];
         }
     }
     else {
-        $_SESSION['errs'].='<br>- Please enter valid login';
+        $_SESSION['errs'].='<br>- '.$language['41'];
     }
     $_SESSION['errs'].='</h4></font>';
-    header('location: index.php');
+    if(isset($_SESSION['username'])) {
+        header('location: index.php');
+    }
+    else {
+        header('Location: '.$_SERVER['HTTP_REFERER']);
+    }
 ?>
